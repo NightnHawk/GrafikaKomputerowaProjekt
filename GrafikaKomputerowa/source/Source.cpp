@@ -126,15 +126,12 @@ int main()
 		0, 2, 3
 	};
 
-	VertexArray VAO;
-	VertexBuffer VBO(vertices, sizeof(vertices));
-
-	VertexBufferLayout layout;
-	layout.Push<float>(3);
-	VAO.AddBuffer(VBO, layout);
-
-	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));
-
+	VertexArray VAO;												// Generates and binds a Vertex Array Object
+	VertexBuffer VBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
+	VertexBufferLayout layout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
+	layout.Push<float>(3);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
+	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
+	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
 	GLuint shader = CreateShader(get_file_contents("resources/shaders/default.vert"), get_file_contents("resources/shaders/default.frag"));
 	glUseProgram(shader);
 
@@ -153,10 +150,8 @@ int main()
 
 		glUseProgram(shader);
 		glUniform4f(location, r, 0.2f, 1.0f, 1.0f);
-		VAO.Bind();
-		EBO.Bind();
-
-
+		VAO.Bind();													//Binds Vertex Array Object to be used in a draw call. Given Vertex Buffer is binded along with it by glVertexAttribPointer() before so it doesn't have to be bound
+		EBO.Bind();													//Binds Index Buffer Object to be used in a draw call. A specified Index Bufer has to always be bound to draw a given model.
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, NULL);
 
 		if (r > 1.0f)
