@@ -8,6 +8,7 @@
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -125,19 +126,14 @@ int main()
 		0, 2, 3
 	};
 
-	GLuint VertexArray;
-
-	glGenVertexArrays(1, &VertexArray);
-
-	glBindVertexArray(VertexArray);
-
+	VertexArray VAO;
 	VertexBuffer VBO(vertices, sizeof(vertices));
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
 
+	VertexBufferLayout layout;
+	layout.Push<float>(3);
+	VAO.AddBuffer(VBO, layout);
 
 	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));
-	glBindVertexArray(0);
 
 	GLuint shader = CreateShader(get_file_contents("resources/shaders/default.vert"), get_file_contents("resources/shaders/default.frag"));
 	glUseProgram(shader);
@@ -157,8 +153,7 @@ int main()
 
 		glUseProgram(shader);
 		glUniform4f(location, r, 0.2f, 1.0f, 1.0f);
-		glBindVertexArray(VertexArray);
-
+		VAO.Bind();
 		EBO.Bind();
 
 
@@ -173,8 +168,6 @@ int main()
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-	glDeleteVertexArrays(1, &VertexArray);
 	glDeleteProgram(shader);
 	glfwDestroyWindow(window);
 	glfwTerminate();
