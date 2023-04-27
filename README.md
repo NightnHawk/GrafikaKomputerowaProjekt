@@ -17,7 +17,8 @@ Project Properites
         
             $(SolutionDir)Dependencies\GLFW\lib-vc2022
             
-    >> Input
+   
+   >> Input
         - Additional Dependencies
         
             opengl32.lib;
