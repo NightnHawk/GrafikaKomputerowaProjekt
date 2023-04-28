@@ -50,3 +50,11 @@ public:
 	inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }
 	inline GLuint GetStride() const { return m_Stride; }
 };
+
+// VertexBufferLayout is an auxiliary class used to automatically
+// specify the location and data format of the array of generic
+// vertex attributes at given index (specified in the VertexArray
+// class method) to use when rendering.
+// In simplification, only vertex attributes passed into the
+// VertexBufferElement vector, of the unsigned int (GLuint) type
+// are normalized by GPU.
