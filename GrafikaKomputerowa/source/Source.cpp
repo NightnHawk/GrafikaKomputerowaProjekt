@@ -1,15 +1,13 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include<cerrno>
 
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Renderer.h"
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -88,18 +86,22 @@ int main()
 	VBO.Unbind();
 	EBO.Unbind();
 
+	Renderer renderer;
+	renderer.SetBackgroundColor(glm::vec3(0.07f, 0.13f, 0.17f));
+
 	float r = 0.0f;
 	float increment = 0.05f;
 	while (!glfwWindowShouldClose(window))
 	{
-		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT);
+	
 
 		shader.Bind();
 		shader.SetUniform4f("u_Color", glm::vec4(r, 0.2f, 1.0f, 1.0f));
-		VAO.Bind();													//Binds Vertex Array Object to be used in a draw call. Given Vertex Buffer is binded along with it by glVertexAttribPointer() before so it doesn't have to be bound
-		EBO.Bind();													//Binds Index Buffer Object to be used in a draw call. A specified Index Bufer has to always be bound to draw a given model.
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, NULL);
+
+		renderer.Clear();
+		renderer.Draw(VAO, EBO, shader);
 
 		if (r > 1.0f)
 			increment = -0.025f;
