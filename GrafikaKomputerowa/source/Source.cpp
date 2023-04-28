@@ -9,6 +9,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -22,62 +23,6 @@ MessageCallback(GLenum source,
 	fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
 		(type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
 		type, severity, message);
-}
-
-std::string get_file_contents(const char* filename)
-{
-	std::ifstream in(filename, std::ios::binary);
-	if (in)
-	{
-		std::string contents;
-		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
-		in.close();
-		return(contents);
-	}
-	throw(errno);
-}
-
-static GLuint CompileShader(GLuint type, const std::string& source)
-{
-	GLuint id = glCreateShader(type);
-	const char* src = source.c_str();
-	glShaderSource(id, 1, &src, NULL);
-	glCompileShader(id);
-
-	int result;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-	if (!result)
-	{
-		int length;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
-		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader." << std::endl;
-		std::cout << message << std::endl;
-		glDeleteShader(id);
-		return 0;
-	}
-
-	return id;
-}
-
-static GLuint CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
-{
-	GLuint program = glCreateProgram();
-	GLuint vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	GLuint fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-	glLinkProgram(program);
-	glValidateProgram(program);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program;
 }
 
 int main()
@@ -132,14 +77,16 @@ int main()
 	layout.Push<float>(3);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
 	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
 	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
-	GLuint shader = CreateShader(get_file_contents("resources/shaders/default.vert"), get_file_contents("resources/shaders/default.frag"));
-	glUseProgram(shader);
+	
+	Shader shader("./resources/shaders/Basic.shader");
+	shader.Bind();
+	
+	shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 
-	int location = glGetUniformLocation(shader, "u_Color");
-
-	glUniform4f(location, 0.0f, 0.2f, 1.0f, 1.0f);
-
-	glUseProgram(0);
+	shader.Unbind();
+	VAO.Unbind();
+	VBO.Unbind();
+	EBO.Unbind();
 
 	float r = 0.0f;
 	float increment = 0.05f;
@@ -148,22 +95,21 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shader);
-		glUniform4f(location, r, 0.2f, 1.0f, 1.0f);
+		shader.Bind();
+		shader.SetUniform4f("u_Color", glm::vec4(r, 0.2f, 1.0f, 1.0f));
 		VAO.Bind();													//Binds Vertex Array Object to be used in a draw call. Given Vertex Buffer is binded along with it by glVertexAttribPointer() before so it doesn't have to be bound
 		EBO.Bind();													//Binds Index Buffer Object to be used in a draw call. A specified Index Bufer has to always be bound to draw a given model.
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, NULL);
 
 		if (r > 1.0f)
-			increment = -0.05f;
+			increment = -0.025f;
 		else if (r < 0.0f)
-			increment = 0.05f;
+			increment = 0.025f;
 		r += increment;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	glDeleteProgram(shader);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 	return 0;
