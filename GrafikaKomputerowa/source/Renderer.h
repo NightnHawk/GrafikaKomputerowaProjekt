@@ -14,7 +14,8 @@ private:
 public:
 	Renderer() : m_BackgroundColor(glm::vec3(0.0f, 0.0f, 0.0f)) {};
 
-	void SetBackgroundColor(glm::vec3 RGB);
+	void EnableBlend() const;
+	void SetBackgroundColor(glm::vec3 RGB) { m_BackgroundColor = RGB; }
 	void Clear() const;
 	void Draw(const VertexArray& VAO, const IndexBuffer& EBO, const Shader& shader) const;
 };

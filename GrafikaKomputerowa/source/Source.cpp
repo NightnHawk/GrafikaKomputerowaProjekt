@@ -8,6 +8,7 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Renderer.h"
+#include "Texture.h"
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -57,10 +58,10 @@ int main()
 
 	GLfloat vertices[] =
 	{
-		-0.5f, -0.5f, 0.0f,	//0
-		 0.5f, -0.5f, 0.0f,	//1
-		 0.5f,  0.5f, 0.0f,	//2
-		-0.5f,  0.5f, 0.0f	//3
+		-0.5f, -0.5f,  0.0f,  0.0f, 0.0f,	//0
+		 0.5f, -0.5f,  0.0f,  1.0f, 0.0f,	//1
+		 0.5f,  0.5f,  0.0f,  1.0f, 1.0f,	//2
+		-0.5f,  0.5f,  0.0f,  0.0f, 1.0f	//3
 	};
 
 	GLuint indices[] =
@@ -72,7 +73,8 @@ int main()
 	VertexArray VAO;												// Generates and binds a Vertex Array Object
 	VertexBuffer VBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
 	VertexBufferLayout layout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
-	layout.Push<float>(3);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
+	layout.Push<float>(3);
+	layout.Push<float>(2);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
 	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
 	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
 	
@@ -81,6 +83,10 @@ int main()
 	
 	shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 
+	Texture texture("./resources/textures/brick.png");
+	texture.Bind();							// Binded to 0
+	shader.SetUniform1i("u_Texture", 0);	// So 0 also here
+
 	shader.Unbind();
 	VAO.Unbind();
 	VBO.Unbind();
@@ -88,17 +94,14 @@ int main()
 
 	Renderer renderer;
 	renderer.SetBackgroundColor(glm::vec3(0.07f, 0.13f, 0.17f));
+	renderer.EnableBlend();
 
 	float r = 0.0f;
 	float increment = 0.05f;
 	while (!glfwWindowShouldClose(window))
 	{
-		//glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-		//glClear(GL_COLOR_BUFFER_BIT);
-	
-
 		shader.Bind();
-		shader.SetUniform4f("u_Color", glm::vec4(r, 0.2f, 1.0f, 1.0f));
+		shader.SetUniform4f("u_Color", glm::vec4(r, 0.0f, 1.0f, 1.0f));
 
 		renderer.Clear();
 		renderer.Draw(VAO, EBO, shader);

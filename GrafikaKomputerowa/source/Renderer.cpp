@@ -1,10 +1,5 @@
 #include "Renderer.h"
 
-void Renderer::SetBackgroundColor(glm::vec3 RGB)
-{
-	m_BackgroundColor = RGB;
-}
-
 void Renderer::Clear() const
 {
 
@@ -19,3 +14,11 @@ void Renderer::Draw(const VertexArray& VAO, const IndexBuffer& EBO, const Shader
 	EBO.Bind();													//Binds Index Buffer Object to be used in a draw call. A specified Index Bufer has to always be bound to draw a given model.
 	glDrawElements(GL_TRIANGLES, EBO.GetCount(), GL_UNSIGNED_INT, NULL);
 }
+
+void Renderer::EnableBlend() const
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+

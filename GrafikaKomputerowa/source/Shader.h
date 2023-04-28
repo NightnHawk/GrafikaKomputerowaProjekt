@@ -22,7 +22,9 @@ public:
 	~Shader();
 
 	//Set uniforms
-	void SetUniform1f(const std::string& name, GLfloat values);
+	void SetUniform1i(const std::string& name, GLint value);
+
+	void SetUniform1f(const std::string& name, GLfloat value);
 	void SetUniform2f(const std::string& name, glm::vec2 values);
 	void SetUniform3f(const std::string& name, glm::vec3 values);
 	void SetUniform4f(const std::string& name, glm::vec4 values);
