@@ -29,6 +29,8 @@ public:
 	void SetUniform3f(const std::string& name, glm::vec3 values);
 	void SetUniform4f(const std::string& name, glm::vec4 values);
 
+	void SetUniformMat4f(const std::string& name, glm::mat4 matrix);
+
 	void Bind() const;
 	void Unbind() const;
 

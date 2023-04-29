@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\glad.c" />
     <ClCompile Include="source\IndexBuffer.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
@@ -287,6 +288,7 @@
     <None Include="source\vendor\glm\gtx\wrap.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\IndexBuffer.h" />
     <ClInclude Include="source\Renderer.h" />
     <ClInclude Include="source\Shader.h" />

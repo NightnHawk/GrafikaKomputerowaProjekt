@@ -41,6 +41,11 @@ void Shader::SetUniform4f(const std::string& name, glm::vec4 values)
 	glUniform4f(getUniformLocation(name), values.x, values. y, values.z, values.w);
 }
 
+void Shader::SetUniformMat4f(const std::string& name, glm::mat4 matrix)
+{
+	glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &matrix[0][0]);
+}
+
 void Shader::Bind() const
 {
 	glUseProgram(m_ID);														// Binds the shader program

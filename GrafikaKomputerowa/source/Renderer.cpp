@@ -4,7 +4,7 @@ void Renderer::Clear() const
 {
 
 	glClearColor(m_BackgroundColor.x, m_BackgroundColor.y, m_BackgroundColor.z, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::Draw(const VertexArray& VAO, const IndexBuffer& EBO, const Shader& shader) const
@@ -19,6 +19,16 @@ void Renderer::EnableBlend() const
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void Renderer::EnableDepthTesting() const
+{
+	glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::EnableBackfaceCulling() const
+{
+	glEnable(GL_CULL_FACE);
 }
 
 
