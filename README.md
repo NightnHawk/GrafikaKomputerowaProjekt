@@ -28,7 +28,11 @@ Project Properites
 
 ________________________________________________________________________________________________________
 Camera Input:
+    
     WASD - basic movement defined by direction faced (stored as m_Orientation) parallel to a horizontal plane in Euclidean space.
+    
     Space - uward movement, congruent to Y axis.
+    
     Shift - downward movement, congruent to Y axis.
+    
     ESC - closes the window.
