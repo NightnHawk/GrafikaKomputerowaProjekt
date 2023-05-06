@@ -9,7 +9,7 @@ Project Properites
             
             $(SolutionDir)Dependencies\GLFW\include;
             
-            $(SolutionDir)Dependencies\GLAD\include;
+            $(SolutionDir)Dependencies\GLAD\include
 
 >> Linker
     >> General
@@ -25,6 +25,8 @@ Project Properites
             opengl32.lib;
             
             glfw3.lib;
+            
+            %(AdditionalDependencies)
 
 ________________________________________________________________________________________________________
 Camera Input:
