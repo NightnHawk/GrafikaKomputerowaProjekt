@@ -47,7 +47,7 @@ in vec3 v_aNormal;
 in vec3 v_CrntPos;
 
 
-uniform vec4 u_Color;
+// vec4 u_Color;
 uniform sampler2D u_Texture;
 uniform vec4 u_LightColor;
 uniform vec3 u_LightPos;
@@ -69,18 +69,18 @@ vec4 PointLight() {
 
     // specular lighting
     float specularLight = 0.50f;
-    vec3 viewDirection = normalize(u_CamPos - v_CrntPos);
+    vec3 viewDirection = normalize(u_Cam - v_CrntPos);
     vec3 reflectionDirection = reflect(-lightDirection, normal);
     float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
     float specular = specAmount * specularLight;
 
-    return (texture(u_Texture, v_TexCoord) * (diffuse * inten + ambient)); / +texture(tex1, texCoord).r specular * inten)* lightColor; /
+    return (texture(u_Texture, v_TexCoord) * (diffuse * inten + ambient));
 
 }
 
 void main()
 {
 	//vec4 texColor = texture(u_Texture, v_TexCoord);
-	color = u_Color * texColor * PointLight;
+	color = PointLight();
 
 }

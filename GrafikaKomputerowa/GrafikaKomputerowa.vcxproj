@@ -160,8 +160,8 @@
     <ClCompile Include="source\VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Projekt Grafika V2\GrafikaKomputerowaProjekt-master\GrafikaKomputerowa\resources\shaders\LightShader.shader" />
     <None Include="resources\shaders\Basic.shader" />
+    <None Include="resources\shaders\LightShader.shader" />
     <None Include="source\vendor\glm\detail\func_common.inl" />
     <None Include="source\vendor\glm\detail\func_common_simd.inl" />
     <None Include="source\vendor\glm\detail\func_exponential.inl" />

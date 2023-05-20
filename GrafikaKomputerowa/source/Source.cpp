@@ -117,8 +117,9 @@ int main()
 	glm::vec3 u_LightPos = glm::vec3(0.5f, 0.5f, 0.5f);
 	Lshader.SetUniform3f("u_LightColor", u_LightPos);
 	glm::vec3 u_Cam = glm::vec3(0.5f, 0.5f, 0.5f);
-	Lshader.SetUniform3f("u_Cam", u_Cam);
-
+	shader.Bind();
+	shader.SetUniform3f("u_Cam", u_Cam);
+	
 
 	shader.Unbind();
 	Lshader.Unbind();
@@ -158,8 +159,8 @@ int main()
 		else if (r < 0.0f)
 			increment = 0.025f;
 		r += increment;
+		*/
 		
-		/*
 		for (unsigned int i = 0; i < model_testing.num_meshes; ++i)
 		{
 			glBindTexture(GL_TEXTURE_2D, model_testing.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
@@ -167,12 +168,12 @@ int main()
 			glBindVertexArray(model_testing.mesh_list[i].VAO);
 			glDrawElements(GL_TRIANGLES, (GLsizei)model_testing.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
-		}*/
+		}
 
 		Lshader.Bind();
 		camera.Matrix(45.0f, 0.1f, 100.0f, Lshader, "u_CamMatrix");
 		LVAO.Bind();
-		glDrawElements(GL_TRIANGLES, sizeof(vertices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
