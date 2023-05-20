@@ -48,6 +48,9 @@
     <ClCompile Include="source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\load_model_mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\Basic.shader" />
@@ -458,6 +461,9 @@
     </None>
     <None Include="source\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\Projekt Grafika V2\GrafikaKomputerowaProjekt-master\GrafikaKomputerowa\resources\shaders\LightShader.shader">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1332,6 +1338,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\load_model_mesh.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Shader_configure.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\VertexBuferLayoutLoad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

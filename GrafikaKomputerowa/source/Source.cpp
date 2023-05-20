@@ -4,15 +4,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Shader_configure.h"
 #include "Renderer.h"
 #include "Texture.h"
 #include "Camera.h"
+#include "load_model_mesh.h"
+
 
 void GLAPIENTRY
 MessageCallback(GLenum source,
@@ -81,24 +87,47 @@ int main()
 	VertexArray VAO;												// Generates and binds a Vertex Array Object
 	VertexBuffer VBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
 	VertexBufferLayout layout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
-	layout.Push<float>(3);
-	layout.Push<float>(2);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
+	layout.Push<glm::vec3>(1);
+	layout.Push<glm::vec3>(1);										// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
+	layout.Push<glm::vec2>(1);
 	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
 	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
 
 	Shader shader("./resources/shaders/Basic.shader");
 	shader.Bind();
-	
+
 	shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 
 	Texture texture("./resources/textures/brick.png");
 	texture.Bind();							// Binded to 0
 	shader.SetUniform1i("u_Texture", 0);	// So 0 also here
 
+	Shader Lshader("./resources/shaders/LightShader.shader");
+	Lshader.Bind();
+
+	Lshader.SetUniform4f("u_LightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	VertexArray LVAO;												// Generates and binds a Vertex Array Object
+	VertexBuffer LVBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
+	VertexBufferLayout Llayout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
+	Llayout.Push<float>(3);
+	LVAO.AddBuffer(LVBO, Llayout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
+	IndexBuffer LEBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
+
+	glm::vec3 u_LightPos = glm::vec3(0.5f, 0.5f, 0.5f);
+	Lshader.SetUniform3f("u_LightColor", u_LightPos);
+	glm::vec3 u_Cam = glm::vec3(0.5f, 0.5f, 0.5f);
+	Lshader.SetUniform3f("u_Cam", u_Cam);
+
+
 	shader.Unbind();
+	Lshader.Unbind();
 	VAO.Unbind();
 	VBO.Unbind();
 	EBO.Unbind();
+	LVAO.Unbind();
+	LVBO.Unbind();
+	LEBO.Unbind();
 
 	Renderer renderer;
 	renderer.SetBackgroundColor(glm::vec3(0.07f, 0.13f, 0.17f));
@@ -110,21 +139,40 @@ int main()
 	float r = 0.0f;
 	float increment = 0.05f;
 
+	Model model_testing("./resources/objects/kaplica.obj");
+
 	while (!glfwWindowShouldClose(window))
 	{
 		shader.Bind();
 		shader.SetUniform4f("u_Color", glm::vec4(r, 0.0f, 1.0f, 1.0f));
-
+		
+		
 		camera.Matrix(45.0f, 0.1f, 100.0f, shader, "u_CamMatrix");
 		camera.Inputs(window);
 		renderer.Clear();
+		/*
 		renderer.Draw(VAO, EBO, shader);
-
+		
 		if (r > 1.0f)
 			increment = -0.025f;
 		else if (r < 0.0f)
 			increment = 0.025f;
 		r += increment;
+		
+		/*
+		for (unsigned int i = 0; i < model_testing.num_meshes; ++i)
+		{
+			glBindTexture(GL_TEXTURE_2D, model_testing.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
+
+			glBindVertexArray(model_testing.mesh_list[i].VAO);
+			glDrawElements(GL_TRIANGLES, (GLsizei)model_testing.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}*/
+
+		Lshader.Bind();
+		camera.Matrix(45.0f, 0.1f, 100.0f, Lshader, "u_CamMatrix");
+		LVAO.Bind();
+		glDrawElements(GL_TRIANGLES, sizeof(vertices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

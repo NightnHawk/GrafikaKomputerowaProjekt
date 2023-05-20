@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <vector>
 #include <stdexcept>
+#include <glm/glm.hpp>
 
 struct VertexBufferElement
 {
@@ -45,6 +46,18 @@ public:
 	{
 		m_Elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
 		m_Stride += sizeof(GLubyte) * count;
+	}
+
+	template<>
+	void Push<glm::vec3>(GLuint count) {
+		m_Elements.push_back({ GL_FLOAT, 3*count, GL_FALSE });
+		m_Stride += sizeof(GLfloat) * 3*count;
+	}
+
+	template<>
+	void Push<glm::vec2>(GLuint count) {
+		m_Elements.push_back({ GL_FLOAT, 2 * count, GL_FALSE });
+		m_Stride += sizeof(GLfloat) * 2 * count;
 	}
 
 	inline const std::vector<VertexBufferElement>& GetElements() const { return m_Elements; }

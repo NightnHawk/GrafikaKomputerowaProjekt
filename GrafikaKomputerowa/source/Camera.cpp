@@ -13,6 +13,7 @@ void Camera::Matrix(float FOVdegree, float nearPlane, float farPlane, Shader& sh
 	shader.SetUniformMat4f(uniform, projection * view);
 }
 
+
 void Camera::Inputs(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
