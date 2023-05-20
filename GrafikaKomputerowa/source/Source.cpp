@@ -66,10 +66,10 @@ int main()
 
 	GLfloat vertices[] =
 	{
-		-0.5f, -0.5f,  0.0f,  0.0f, 0.0f,	//0
-		 0.5f, -0.5f,  0.0f,  1.0f, 0.0f,	//1
-		 0.5f,  0.5f,  0.0f,  1.0f, 1.0f,	//2
-		-0.5f,  0.5f,  0.0f,  0.0f, 1.0f	//3
+		-0.5f, -0.5f,  0.0f,  0.0f, 0.0f, 1.0f, 0.5f, 0.12f,	//0
+		 0.5f, -0.5f,  0.0f,  1.0f, 0.0f, 0.65f, 1.0f, 0.0f,	//1
+		 0.5f,  0.5f,  0.0f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f,		//2
+		-0.5f,  0.5f,  0.0f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f		//3
 	};
 
 	GLuint indices[] =
@@ -78,22 +78,79 @@ int main()
 		0, 2, 3
 	};
 
+	GLfloat lightVertices[] =
+	{ //     COORDINATES     //
+		-0.1f, -0.1f,  0.1f,
+		-0.1f, -0.1f, -0.1f,
+		 0.1f, -0.1f, -0.1f,
+		 0.1f, -0.1f,  0.1f,
+		-0.1f,  0.1f,  0.1f,
+		-0.1f,  0.1f, -0.1f,
+		 0.1f,  0.1f, -0.1f,
+		 0.1f,  0.1f,  0.1f
+	};
+
+	GLuint lightIndices[] =
+	{
+		0, 1, 2,
+		0, 2, 3,
+		0, 4, 7,
+		0, 7, 3,
+		3, 7, 6,
+		3, 6, 2,
+		2, 6, 5,
+		2, 5, 1,
+		1, 5, 4,
+		1, 4, 0,
+		4, 5, 6,
+		4, 6, 7
+	};
+
 	VertexArray VAO;												// Generates and binds a Vertex Array Object
 	VertexBuffer VBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
 	VertexBufferLayout layout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
 	layout.Push<float>(3);
 	layout.Push<float>(2);											// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
+	layout.Push<float>(3);
 	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
 	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
 
 	Shader shader("./resources/shaders/Basic.shader");
 	shader.Bind();
 	
-	shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
+	//shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 
 	Texture texture("./resources/textures/brick.png");
 	texture.Bind();							// Binded to 0
 	shader.SetUniform1i("u_Texture", 0);	// So 0 also here
+
+	Shader light("./resources/shaders/Light.shader");
+	light.Bind();
+
+	VertexArray lightVAO;
+	VertexBuffer lightVBO(lightVertices, sizeof(lightVertices));
+	VertexBufferLayout lightLayout;
+	lightLayout.Push<float>(3);
+	lightVAO.AddBuffer(lightVBO, lightLayout);
+	IndexBuffer lightEBO(lightIndices, sizeof(lightIndices) / sizeof(GLuint));
+
+	glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.5f);
+	glm::mat4 lightModel = glm::mat4(1.0f);
+	lightModel = glm::translate(lightModel, lightPos);
+
+	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::mat4 objectModel = glm::mat4(1.0f);
+	objectModel = glm::translate(objectModel, objectPos);
+
+	light.SetUniformMat4f("u_Model", lightModel);
+	light.SetUniform4f("u_LightColor", lightColor);
+
+	shader.Bind();
+
+	shader.SetUniformMat4f("u_Model", objectModel);
+	shader.SetUniform4f("u_LightColor", lightColor);
+	shader.SetUniform3f("u_LightPos", lightPos);
 
 	shader.Unbind();
 	VAO.Unbind();
@@ -107,24 +164,18 @@ int main()
 
 	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
 
-	float r = 0.0f;
-	float increment = 0.05f;
-
 	while (!glfwWindowShouldClose(window))
 	{
 		shader.Bind();
-		shader.SetUniform4f("u_Color", glm::vec4(r, 0.0f, 1.0f, 1.0f));
-
 		camera.Matrix(45.0f, 0.1f, 100.0f, shader, "u_CamMatrix");
 		camera.Inputs(window);
 		renderer.Clear();
 		renderer.Draw(VAO, EBO, shader);
 
-		if (r > 1.0f)
-			increment = -0.025f;
-		else if (r < 0.0f)
-			increment = 0.025f;
-		r += increment;
+		light.Bind();
+		camera.Matrix(45.0f, 0.1f, 100.0f, light, "u_CamMatrix");
+		lightVAO.Bind();
+		glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
