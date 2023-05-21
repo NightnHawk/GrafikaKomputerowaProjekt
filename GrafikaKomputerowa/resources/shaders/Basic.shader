@@ -12,6 +12,7 @@ layout(location = 2) in vec2 texCoord;
 out vec2 v_TexCoord;
 out vec3 v_aNormal;
 out vec3 v_CrntPos;
+out vec4 color1;
 
 
 
@@ -33,6 +34,8 @@ void main()
 	v_TexCoord = texCoord;
 	v_aNormal = aNormal;
 	v_CrntPos = vec3(Mesh * position);
+
+    color1 = vec4(1.0, 1.0, 1.0, 1.0);
 }
 
 
@@ -45,6 +48,7 @@ layout(location = 0) out vec4 color;
 in vec2 v_TexCoord;
 in vec3 v_aNormal;
 in vec3 v_CrntPos;
+in vec4 color1;
 
 
 // vec4 u_Color;
@@ -61,20 +65,22 @@ vec4 PointLight() {
     float b = 0.7;
     float inten = 1.0f / (a * dist * dist + b * dist + 1.0f);
 
-    float ambient = 0.20f;
+    float ambient = 0.50f;
+
 
     vec3 normal = normalize(v_aNormal);
     vec3 lightDirection = normalize(lightVec);
-    float diffuse = max(dot(normal, lightDirection), 0.0f);
+    float diffuse = max(dot(normal, lightDirection), 1.0f);
 
     // specular lighting
     float specularLight = 0.50f;
     vec3 viewDirection = normalize(u_Cam - v_CrntPos);
     vec3 reflectionDirection = reflect(-lightDirection, normal);
-    float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 16);
+    float specAmount = pow(max(dot(viewDirection, reflectionDirection), 1.0f), 16);
     float specular = specAmount * specularLight;
 
-    return (texture(u_Texture, v_TexCoord) * (diffuse * inten + ambient));
+    return u_LightColor * (color1 * (diffuse * inten + ambient));
+    //return (texture(u_Texture, v_TexCoord) * (diffuse * inten + ambient));
 
 }
 

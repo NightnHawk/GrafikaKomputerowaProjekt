@@ -17,8 +17,7 @@ class Model
 private:
 	Assimp::Importer importer; 
 	const aiScene* scene = nullptr;
-	aiNode* root_node = nullptr; // Only being used in the: load_model_cout_console() function.
-
+	aiNode* root_node = nullptr;
 	struct Mesh
 	{
 		unsigned int VAO, VBO1, VBO2, VBO3, EBO; // Buffer handles (Typically type: GLuint is used)

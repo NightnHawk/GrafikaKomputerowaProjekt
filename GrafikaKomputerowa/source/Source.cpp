@@ -34,8 +34,8 @@ MessageCallback(GLenum source,
 		type, severity, message);
 }
 
-const static int width = 960;
-const static int height = 540;
+const static int width = 1080;
+const static int height = 640;
 
 int main()
 {
@@ -84,15 +84,7 @@ int main()
 		0, 2, 3
 	};
 
-	VertexArray VAO;												// Generates and binds a Vertex Array Object
-	VertexBuffer VBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
-	VertexBufferLayout layout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
-	layout.Push<glm::vec3>(1);
-	layout.Push<glm::vec3>(1);										// Adds a grouped data to layout onto the auto_incremented slot, here nr zero
-	layout.Push<glm::vec2>(1);
-	VAO.AddBuffer(VBO, layout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
-	IndexBuffer EBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
-
+	
 	Shader shader("./resources/shaders/Basic.shader");
 	shader.Bind();
 
@@ -107,6 +99,9 @@ int main()
 
 	Lshader.SetUniform4f("u_LightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
+	glm::vec3 u_Pos = glm::vec3(-1.5f, 20.5f, 0.5f);
+	Lshader.SetUniform3f("u_Pos", u_Pos);
+
 	VertexArray LVAO;												// Generates and binds a Vertex Array Object
 	VertexBuffer LVBO(vertices, sizeof(vertices));					// Generates, binds and initializes a Vertex Buffer with data given
 	VertexBufferLayout Llayout;										// Generates a layout object that stores the Vertex Buffer layout. Describes the way the GPU is to read the vertices data
@@ -114,18 +109,25 @@ int main()
 	LVAO.AddBuffer(LVBO, Llayout);										// The internal function glVertexAttribPointer() binds together Vertex Array and Vertex Buffer, defining the way the buffer stream is read by GPU
 	IndexBuffer LEBO(indices, sizeof(indices) / sizeof(GLuint));		// Generates, binds and initializes an Index Array Object with data given. EBO is not binded to VAO in any way, thus it must be binded befr draw call to be used
 
-	glm::vec3 u_LightPos = glm::vec3(0.5f, 0.5f, 0.5f);
-	Lshader.SetUniform3f("u_LightColor", u_LightPos);
-	glm::vec3 u_Cam = glm::vec3(0.5f, 0.5f, 0.5f);
+
 	shader.Bind();
+	glm::vec3 u_LightPos = glm::vec3(-1.5f, 1.5f, 0.5f);
+	shader.SetUniform3f("u_LightPos", u_LightPos);
+	glm::vec3 u_Cam = glm::vec3(0.5f, 0.5f, 0.5f);
 	shader.SetUniform3f("u_Cam", u_Cam);
+	shader.SetUniform4f("u_LightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
 	
+	Shader Floorshader("./resources/shaders/Floor.shader");
+	Floorshader.Bind();
+	Floorshader.SetUniform3f("u_Cam", u_Cam);
+	u_Pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	Floorshader.SetUniform3f("u_Pos", u_Pos);
 
 	shader.Unbind();
 	Lshader.Unbind();
-	VAO.Unbind();
-	VBO.Unbind();
-	EBO.Unbind();
+	Floorshader.Unbind();
+
 	LVAO.Unbind();
 	LVBO.Unbind();
 	LEBO.Unbind();
@@ -140,7 +142,9 @@ int main()
 	float r = 0.0f;
 	float increment = 0.05f;
 
-	Model model_testing("./resources/objects/kaplica.obj");
+	Model kaplica("./resources/objects/kaplica.obj");
+	Model model_light("./resources/objects/kw2.obj");
+	Model floor("./resources/objects/floor.obj");
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -161,19 +165,39 @@ int main()
 		r += increment;
 		*/
 		
-		for (unsigned int i = 0; i < model_testing.num_meshes; ++i)
+		for (unsigned int i = 0; i < kaplica.num_meshes; ++i)
 		{
-			glBindTexture(GL_TEXTURE_2D, model_testing.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
+			glBindTexture(GL_TEXTURE_2D, kaplica.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
 
-			glBindVertexArray(model_testing.mesh_list[i].VAO);
-			glDrawElements(GL_TRIANGLES, (GLsizei)model_testing.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(kaplica.mesh_list[i].VAO);
+			glDrawElements(GL_TRIANGLES, (GLsizei)kaplica.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
 		}
-
 		Lshader.Bind();
 		camera.Matrix(45.0f, 0.1f, 100.0f, Lshader, "u_CamMatrix");
 		LVAO.Bind();
-		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(GLuint), GL_UNSIGNED_INT, 0);
+
+		for (unsigned int i = 0; i < model_light.num_meshes; ++i)
+		{
+			glBindTexture(GL_TEXTURE_2D, model_light.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
+
+			glBindVertexArray(model_light.mesh_list[i].VAO);
+			glDrawElements(GL_TRIANGLES, (GLsizei)model_light.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+
+		Floorshader.Bind();
+		camera.Matrix(45.0f, 0.1f, 100.0f, Floorshader, "u_CamMatrix");
+
+		for (unsigned int i = 0; i < floor.num_meshes; ++i)
+		{
+			glBindTexture(GL_TEXTURE_2D, floor.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
+
+			glBindVertexArray(floor.mesh_list[i].VAO);
+			glDrawElements(GL_TRIANGLES, (GLsizei)floor.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
