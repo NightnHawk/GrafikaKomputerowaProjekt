@@ -62,24 +62,24 @@ vec4 PointLight() {
 
     float dist = length(lightVec);
     float a = 3.0;
-    float b = 0.7;
-    float inten = 1.0f / (a * dist * dist + b * dist + 1.0f);
+    float b = 0.3;
+    float inten = 3.0f / (a * dist * dist + b * dist + 1.0f);
 
-    float ambient = 0.50f;
+    float ambient = 0.80f;
 
 
     vec3 normal = normalize(v_aNormal);
     vec3 lightDirection = normalize(lightVec);
-    float diffuse = max(dot(normal, lightDirection), 1.0f);
+    float diffuse = max(dot(normal, lightDirection), 0.0f);
 
     // specular lighting
     float specularLight = 0.50f;
     vec3 viewDirection = normalize(u_Cam - v_CrntPos);
     vec3 reflectionDirection = reflect(-lightDirection, normal);
-    float specAmount = pow(max(dot(viewDirection, reflectionDirection), 1.0f), 16);
+    float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 32);
     float specular = specAmount * specularLight;
 
-    return u_LightColor * (color1 * (diffuse * inten + ambient));
+    return u_LightColor * (color1 * (diffuse + inten + ambient));
     //return (texture(u_Texture, v_TexCoord) * (diffuse * inten + ambient));
 
 }

@@ -72,10 +72,10 @@ int main()
 
 	GLfloat vertices[] =
 	{
-		-0.5f, -0.5f,  0.0f,  0.0f, 0.0f,	//0
-		 0.5f, -0.5f,  0.0f,  1.0f, 0.0f,	//1
-		 0.5f,  0.5f,  0.0f,  1.0f, 1.0f,	//2
-		-0.5f,  0.5f,  0.0f,  0.0f, 1.0f	//3
+		-44.5f, 0.0f,  44.5f,  0.0f, 0.0f,	//0
+		 44.5f, 0.0f,  44.5f,  3.0f, 0.0f,	//1
+		 44.5f,  0.0f, -44.5f,  3.0f, 3.0f,	//2
+		-44.5f,  0.0f, -44.5f,  0.0f, 3.0f	//3
 	};
 
 	GLuint indices[] =
@@ -84,11 +84,33 @@ int main()
 		0, 2, 3
 	};
 
+	VertexArray GrassVAO;
+	VertexBuffer GrassVBO(vertices, sizeof(vertices));
+	VertexBufferLayout GrassLayout;
+
+	GrassLayout.Push<float>(3);
+	GrassLayout.Push<float>(2);
+
+	GrassVAO.AddBuffer(GrassVBO, GrassLayout);
+
+	IndexBuffer GrassEBO(indices, sizeof(indices) / sizeof(unsigned int));
+
+	Shader Floorshader("./resources/shaders/Floor.shader");
+	Floorshader.Bind();
+	glm::mat4 u_CamMatrix = glm::mat4(1);
+	Floorshader.SetUniformMat4f("u_CamMatrix", u_CamMatrix);
+	glm::vec4 position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	Floorshader.SetUniform4f("position", position);
+
+	Floorshader.SetUniform4f("u_Color", glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
+
+	Texture grass("./resources/textures/grass.jpg");
+	grass.Bind();
+	Floorshader.SetUniform1i("u_Texture", 0);
 	
+
 	Shader shader("./resources/shaders/Basic.shader");
 	shader.Bind();
-
-	shader.SetUniform4f("u_Color", glm::vec4(0.0f, 0.2f, 1.0f, 1.0f));
 
 	Texture texture("./resources/textures/brick.png");
 	texture.Bind();							// Binded to 0
@@ -99,7 +121,7 @@ int main()
 
 	Lshader.SetUniform4f("u_LightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
-	glm::vec3 u_Pos = glm::vec3(-1.5f, 20.5f, 0.5f);
+	glm::vec3 u_Pos = glm::vec3(12.5f, 20.5f, 0.5f);
 	Lshader.SetUniform3f("u_Pos", u_Pos);
 
 	VertexArray LVAO;												// Generates and binds a Vertex Array Object
@@ -111,18 +133,14 @@ int main()
 
 
 	shader.Bind();
-	glm::vec3 u_LightPos = glm::vec3(-1.5f, 1.5f, 0.5f);
+	glm::vec3 u_LightPos = glm::vec3(-7.5f, 10.5f, 0.5f);
 	shader.SetUniform3f("u_LightPos", u_LightPos);
 	glm::vec3 u_Cam = glm::vec3(0.5f, 0.5f, 0.5f);
 	shader.SetUniform3f("u_Cam", u_Cam);
-	shader.SetUniform4f("u_LightColor", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	shader.SetUniform4f("u_LightColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
 	
-	Shader Floorshader("./resources/shaders/Floor.shader");
-	Floorshader.Bind();
-	Floorshader.SetUniform3f("u_Cam", u_Cam);
-	u_Pos = glm::vec3(0.0f, 0.0f, 0.0f);
-	Floorshader.SetUniform3f("u_Pos", u_Pos);
+	
 
 	shader.Unbind();
 	Lshader.Unbind();
@@ -144,26 +162,18 @@ int main()
 
 	Model kaplica("./resources/objects/kaplica.obj");
 	Model model_light("./resources/objects/kw2.obj");
-	Model floor("./resources/objects/floor.obj");
+	Model model_light2("./resources/objects/kw2.obj");
+	//Model floor("./resources/objects/floor.obj");
 
 	while (!glfwWindowShouldClose(window))
 	{
 		shader.Bind();
-		shader.SetUniform4f("u_Color", glm::vec4(r, 0.0f, 1.0f, 1.0f));
 		
 		
 		camera.Matrix(45.0f, 0.1f, 100.0f, shader, "u_CamMatrix");
 		camera.Inputs(window);
 		renderer.Clear();
-		/*
-		renderer.Draw(VAO, EBO, shader);
 		
-		if (r > 1.0f)
-			increment = -0.025f;
-		else if (r < 0.0f)
-			increment = 0.025f;
-		r += increment;
-		*/
 		
 		for (unsigned int i = 0; i < kaplica.num_meshes; ++i)
 		{
@@ -177,6 +187,8 @@ int main()
 		camera.Matrix(45.0f, 0.1f, 100.0f, Lshader, "u_CamMatrix");
 		LVAO.Bind();
 
+		Lshader.SetUniform3f("u_Pos", glm::vec3(-7.5f, 20.5f, -17.f));
+
 		for (unsigned int i = 0; i < model_light.num_meshes; ++i)
 		{
 			glBindTexture(GL_TEXTURE_2D, model_light.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
@@ -186,9 +198,26 @@ int main()
 			glBindVertexArray(0);
 		}
 
+		Lshader.SetUniform3f("u_Pos", glm::vec3(-7.5f, 20.5f, 17.5f));
+
+		for (unsigned int i = 0; i < model_light2.num_meshes; ++i)
+		{
+			glBindTexture(GL_TEXTURE_2D, model_light2.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
+
+			glBindVertexArray(model_light2.mesh_list[i].VAO);
+			glDrawElements(GL_TRIANGLES, (GLsizei)model_light2.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
+			glBindVertexArray(0);
+		}
+
 		Floorshader.Bind();
 		camera.Matrix(45.0f, 0.1f, 100.0f, Floorshader, "u_CamMatrix");
 
+		grass.Bind();
+		GrassVAO.Bind();
+		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+
+
+		/*
 		for (unsigned int i = 0; i < floor.num_meshes; ++i)
 		{
 			glBindTexture(GL_TEXTURE_2D, floor.mesh_list[i].tex_handle); // Bind texture for the current mesh.	
@@ -196,7 +225,7 @@ int main()
 			glBindVertexArray(floor.mesh_list[i].VAO);
 			glDrawElements(GL_TRIANGLES, (GLsizei)floor.mesh_list[i].vert_indices.size(), GL_UNSIGNED_INT, 0);
 			glBindVertexArray(0);
-		}
+		}*/
 
 
 		glfwSwapBuffers(window);

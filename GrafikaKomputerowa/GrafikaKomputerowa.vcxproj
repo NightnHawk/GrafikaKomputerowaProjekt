@@ -602,6 +602,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\textures\brick.png" />
+    <Image Include="resources\textures\grass.jpg" />
+    <Image Include="resources\textures\grass2.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
